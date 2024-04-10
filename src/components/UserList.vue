@@ -1,5 +1,5 @@
 <template>
-    <div class="card mt-4">
+    <div class="card mt-4" style="width: 800px;">
       <table class="table m-0">
         <thead>
           <tr>

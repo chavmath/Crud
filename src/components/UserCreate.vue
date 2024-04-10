@@ -1,5 +1,5 @@
 <template>
-    <div class="card card-body mt-4">
+    <div class="card card-body mt-4" style="max-width: 400px;">
       <form @submit.prevent="onSubmit">
         <div class="form-group">
           <label>Name</label>
@@ -21,7 +21,7 @@
   </template>
   
   <script>
-  import { createUser } from '@/firebase'
+  import { createUser } from "../../controllers/user.controller"
   import { reactive } from 'vue'
   
   export default {
