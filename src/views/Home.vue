@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button @click="logout">Cerrar sesión</button>
+    <button class="btn btn-danger btn-sm" @click="logout">Cerrar sesión</button>
     <UserCreate />
     <UserList />
   </div>
@@ -17,16 +17,18 @@ export default {
   components: { UserCreate, UserList },
   setup() {
     const auth = getAuth();
+    const router = useRouter();
 
     const logout = async () => {
-  console.log(auth.currentUser); // Imprime el usuario actual
-  try {
-    await signOut(auth);
-    // El usuario ha cerrado sesión
-  } catch (error) {
-    console.error(`Error al cerrar sesión: ${error}`);
-  }
-};
+      console.log(auth.currentUser); // Imprime el usuario actual
+      try {
+        localStorage.removeItem("user");
+        router.push('/login');
+        // El usuario ha cerrado sesión
+      } catch (error) {
+        console.error(`Error al cerrar sesión: ${error}`);
+      }
+    };
 
     return {
       logout
