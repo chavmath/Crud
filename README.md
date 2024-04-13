@@ -40,7 +40,7 @@ To use the project, follow these steps:
 ## Version 1: CRUD
 In this version of the project, the CRUD operations have been fully implemented, allowing users to execute CRUD actions seamlessly. Basic operations such as creating, reading, updating, and deleting data have been successfully executed, ensuring smooth data manipulation within the system.
 
-![CRUD Image](https://example.com/crud-image.jpg)
+![CRUD Image](https://www.atatus.com/glossary/content/images/2021/07/CRUD.jpeg)
 
 ---
 
