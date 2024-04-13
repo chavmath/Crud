@@ -47,4 +47,4 @@ In this version of the project, the CRUD operations have been fully implemented,
 ## Version 2: Login
 In this version, a robust login feature has been implemented, leveraging Firebase Authentication for user authentication. Users can securely log in to the system using their email and password credentials. Additionally, routes have been protected to ensure that only authenticated users can access certain parts of the application. By implementing stringent security measures, the system enhances overall security, providing a secure environment for user data manipulation.
 
-![Login Image](https://ibb.co/k0B0SZ4)
+![Login Image](https://i.ibb.co/7VCV1hn/Diagrama-de-flujo.png)
