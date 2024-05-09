@@ -1,29 +1,50 @@
-# PaginaTickets
+# Web Engineering - CRUD & Login with Vue.js and Firebase
 
-This template should help get you started developing with Vue 3 in Vite.
+## Description
+This project serves as the foundational phase of system development, offering users essential functionalities for seamless engagement with the platform. Within this initial stage, users can register, log in, and access comprehensive user management features. Once authenticated, users can perform CRUD (Create, Read, Update, Delete) operations on user data, ensuring a smooth and efficient user experience.
 
-## Recommended IDE Setup
+---
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+### Index
+1. [Introduction](#introduction)
+   - [Technologies Used](#technologies-used)
+   - [How to Run the Project](#how-to-run-the-project)
+   - [How to Use the Project](#how-to-use-the-project)
+  
+2. [Version 1: CRUD](#version-1-crud)
 
-## Customize configuration
+3. [Version 2: Login](#version-2-login)
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+---
 
-## Project Setup
+## Introduction
 
-```sh
-npm install
-```
+### Technologies Used
+This is a web MVC project that utilizes Vue.js for the front-end and Firebase for the backend.
+- Vue.js version used: "^3.4.21" 
+- Firebase version used: "^10.10.0" 
 
-### Compile and Hot-Reload for Development
+### How to Run the Project
+1. Clone the repository: `git clone https://github.com/chavmath/Crud`
+2. Navigate to the project directory: `cd Crud`
+3. Install dependencies: `npm install`
 
-```sh
-npm run dev
-```
+### How to Use the Project
+To use the project, follow these steps:
+1. Make sure the Firebase project is set up and configured properly.
+2. Start the development server: `npm run dev`
+3. Access the project in your browser at `http://localhost:8080`
 
-### Compile and Minify for Production
+---
 
-```sh
-npm run build
-```
+## Version 1: CRUD
+In this version of the project, the CRUD operations have been fully implemented, allowing users to execute CRUD actions seamlessly. Basic operations such as creating, reading, updating, and deleting data have been successfully executed, ensuring smooth data manipulation within the system.
+
+![CRUD Image](https://www.atatus.com/glossary/content/images/2021/07/CRUD.jpeg)
+
+---
+
+## Version 2: Login
+In this version, a robust login feature has been implemented, leveraging Firebase Authentication for user authentication. Users can securely log in to the system using their email and password credentials. Additionally, routes have been protected to ensure that only authenticated users can access certain parts of the application. By implementing stringent security measures, the system enhances overall security, providing a secure environment for user data manipulation.
+
+![Login Image](https://i.ibb.co/7VCV1hn/Diagrama-de-flujo.png)
