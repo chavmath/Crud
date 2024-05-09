@@ -92,7 +92,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="data in filteredData" :key="data.id">
+                            <tr v-for="data in paginatedData" :key="data.id">
                                 <td>{{ data.ticket }}</td>
                                 <td>{{ data.estatus }}</td>
                                 <td>{{ data.prioridad }}</td>
@@ -111,6 +111,10 @@
                             </tr>
                         </tbody>
                     </table>
+                    <div class="slider-buttons">
+                        <div v-for="(page, index) in pageCount" :key="index" class="slider-button"
+                            :class="{ active: currentPage === index }" @click="goToPage(index)"></div>
+                    </div>
                 </div>
             </div>
             <div class="col-2" style="padding: 0px;">
@@ -152,6 +156,8 @@ export default {
     data() {
         return {
             ticketEncontrado: null,
+            currentPage: 0,
+            itemsPerPage: 5,
             Busqueda: {
                 fechaInicial: this.getCurrentDate(), // Inicializa con la fecha actual
                 fechaFinal: this.getCurrentDate(), // Inicializa con la fecha actual
@@ -172,6 +178,14 @@ export default {
                 (this.Busqueda.estatus === '' || data.estatus === this.Busqueda.estatus) &&
                 (this.Busqueda.categoria === '' || data.categoria === this.Busqueda.categoria)
             );
+        },
+        paginatedData() {
+            const start = this.currentPage * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            return this.filteredData.slice(start, end);
+        },
+        pageCount() {
+            return Math.ceil(this.filteredData.length / this.itemsPerPage);
         }
     },
     methods: {
@@ -207,6 +221,9 @@ export default {
             this.Busqueda.nombre = '';
             this.Busqueda.estatus = '';
             this.Busqueda.categoria = '';
+        },
+        goToPage(page) {
+            this.currentPage = page;
         },
         exportarPDF() {
             const doc = new jsPDF({
@@ -447,5 +464,26 @@ label {
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     max-width: 350px;
+}
+
+.slider-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+
+.slider-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #f2f2f2;
+    margin: 0 5px;
+    cursor: pointer;
+    border: 1px solid #93459f;
+}
+
+.slider-button.active {
+    background-color: #939397;
 }
 </style>
