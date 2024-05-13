@@ -186,12 +186,14 @@ export default {
             categoria: '',
             unidad: '',
             descripcion: '', //observacion
-            foto: '',
-            inmueble: '',
+            /* foto: '',
+            inmueble: '', */
             estado: 'Abierto',
             fecha: localDate.toISOString(), // Convierte la fecha local a una cadena de texto
             fechacreacion: localDate.toISOString(),
             nombresolicitud: '',
+            actividad: '',
+            responsable: '',
         });
 
         const copropietarios = JSON.parse(localStorage.getItem('copropietarios')) || [];
@@ -230,12 +232,14 @@ export default {
                 form.categoria = '';
                 form.unidad = '';
                 form.descripcion = '';
-                form.foto = '';
-                form.inmueble = '';
+                /* form.foto = '';
+                form.inmueble = ''; */
                 form.estado = '';
                 form.fecha = '';
                 form.fechacreacion = '';
                 form.nombresolicitud = '';
+                //form.actividad = '';
+                //form.responsable = '';
             }
         };
 

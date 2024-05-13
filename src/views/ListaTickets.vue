@@ -70,7 +70,7 @@
                                     <option disabled selected>SELECCIONE UNA OPCIÓN</option>
                                     <option value="Abierto">Abierto</option>
                                     <!-- <option value="CERRADO">Cerrado</option> -->
-                                    <option value="Demorado">Demorado</option>
+                                    <option value="En proceso">En proceso</option>
                                 </select>
                             </div>
                             <div class="col-4">
@@ -184,13 +184,13 @@ export default {
             const response = await axios.get(`https://crud-back-mlk9.onrender.com/listaticketweb/${fechaInicial}/${fechaFinal}`);
             /* const response = await axios.get(`https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`); */
 
-            if (response.data.length === 0 || !response.data.some(ticket => ticket.estado === "Abierto" || ticket.estado === "Demorado")) {
+            if (response.data.length === 0 || !response.data.some(ticket => ticket.estado === "Abierto" || ticket.estado === "En proceso")) {
                 this.ticketEncontrado = false; // No se encontraron tickets o no hay tickets en estado "ABIERTO" o "DEMORADO"
                 this.reportData = [];
             } else {
                 this.ticketEncontrado = true; // Se encontraron tickets
                 this.reportData = response.data
-                    .filter(ticket => ticket.estado === "Abierto" || ticket.estado === "Demorado")
+                    .filter(ticket => ticket.estado === "Abierto" || ticket.estado === "En proceso")
                     .map(item => ({
                         id: item.id,
                         estatus: item.estado,

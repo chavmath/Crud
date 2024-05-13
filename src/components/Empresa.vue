@@ -7,14 +7,14 @@
         </div>
         <div class="col" style="padding: 0px 0px;">
             <div class="row info" style="margin: 0px;">
-                <div class="col-3" style="padding: 0px; margin-right: 5px;">
+                <div class="col-3" style="padding: 0px; margin-right: 5px; display: grid; align-items: center;">
                     <p style="text-align: center; font-size: 13px; margin-bottom: 0px; text-transform: capitalize;">{{ nombre }}</p>
                     <p style="text-align: center; font-size: 14px; font-weight: 300; margin-bottom: 0px;">Conjunto Habitacional</p>
                 </div>
                 <div class="col-1 separator" style="padding: 0px; width: 1px;">
                     <div class="separator"></div>
                 </div>
-                <div class="col-4" style="padding: 0px;">
+                <div class="col-4" style="padding: 0px; display: grid; align-items: center;">
                     <p style="text-align: center; font-size: 13px; margin-bottom: 0px;">{{ administrador }}</p>
                     <p style="text-align: center; font-size: 14px;  font-weight: 300; margin-bottom: 0px;">Administrador de Conjunto
                     </p>
@@ -22,7 +22,7 @@
                 <div class="col-1 separator" style="padding: 0px; width: 1px;">
                     <div class="separator"></div>
                 </div>
-                <div class="col-4" style="padding: 0px;">
+                <div class="col-4" style="padding: 0px; display: grid; align-items: center;">
                     <p style="text-align: center; font-size: 13px; margin-bottom: 0px;">{{ contacto }}</p>
                     <p style="text-align: center; font-size: 14px;  font-weight: 300; margin-bottom: 0px;">Contacto de Administrador
                     </p>
@@ -51,11 +51,17 @@ export default {
         },
         administrador: {
             type: String,
-            default: "FERNANDO PÁEZ"
+            default: () => {
+                const empresa = JSON.parse(localStorage.getItem('empresaSeleccionada'));
+                return empresa ? empresa.administrador : "Juan Pérez";
+            }
         },
         contacto: {
             type: String,
-            default: "1234567890"
+            default: () => {
+                const empresa = JSON.parse(localStorage.getItem('empresaSeleccionada'));
+                return empresa ? empresa.contacto : "55 1234 5678";
+            }
         }
     }
 }

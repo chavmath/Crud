@@ -68,8 +68,8 @@ export default {
     name: "login",
     data() {
         return {
-            username: "1712439486",
-            password: "94869690",
+            username: "1722949383",
+            password: "123",
             nombreusuario: null,
             empresaSeleccionada: null,
             busqueda: "",
@@ -105,7 +105,7 @@ export default {
                 return;
             }
             fetch(
-                "https://sp.pluslogistics.com.ec:7090/logincnd/" +
+                "https://crud-back-mlk9.onrender.com/login/" +
                 this.username +
                 "/" +
                 this.password
