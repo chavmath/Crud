@@ -59,22 +59,22 @@
                         <label for="estatus">Estado:</label>
                         <select v-model="Busqueda.estatus" class="form-control" style="appearance: auto;">
                             <option disabled selected>SELECCIONE UNA OPCIÓN</option>
-                            <option value="ABIERTO">Abierto</option>
-                            <option value="CERRADO">Cerrado</option>
-                            <option value="DEMORADO">Demorado</option>
-                            <option value="DUPLICADO">Duplicado</option>
+                            <option value="Abierto">Abierto</option>
+                            <option value="Cerrado">Cerrado</option>
+                            <option value="Demorado">Demorado</option>
+                            <option value="Duplicado">Duplicado</option>
                         </select>
                     </div>
                     <div class="col-2 select-container" style="width: 200px;">
                         <label for="categoria">Categoría:</label>
                         <select v-model="Busqueda.categoria" class="form-control" style="appearance: auto;">
-                            <option value="ATENCIÓN AL CLIENTE">Atención al cliente</option>
-                            <option value="TESORERÍA">Tesorería</option>
-                            <option value="MANTENIMIENTO">Mantenimiento</option>
-                            <option value="RECOMPENSAS">Recompensas</option>
-                            <option value="SUGERENCIAS">Sugerencias</option>
-                            <option value="INCONFORMIDADES">Inconformidades</option>
-                            <option value="OTROS">Otros</option>
+                            <option value="Atención al cliente">Atención al cliente</option>
+                            <option value="Tesorería">Tesorería</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                            <option value="Recompensas">Recompensas</option>
+                            <option value="Sugerencias">Sugerencias</option>
+                            <option value="Inconformidades">Inconformidades</option>
+                            <option value="Otros">Otros</option>
                         </select>
                     </div>
                     <div class="col-2">
@@ -160,7 +160,7 @@ export default {
             itemsPerPage: 5,
             Busqueda: {
                 fechaInicial: this.getCurrentDate(), // Inicializa con la fecha actual
-                fechaFinal: this.getCurrentDate(), // Inicializa con la fecha actual
+                fechaFinal: this.addOneDay(), // Inicializa con la fecha actual
                 categoria: '',
                 nombre: '',
                 estatus: '',
@@ -192,7 +192,8 @@ export default {
         async buscar() {
             const fechaInicial = this.Busqueda.fechaInicial;
             const fechaFinal = this.Busqueda.fechaFinal;
-            const response = await axios.get(`https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`);
+            /* const response = await axios.get(`https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`); */
+            const response = await axios.get(`https://crud-back-mlk9.onrender.com/listaticketweb/${fechaInicial}/${fechaFinal}`);
 
             if (response.data.length === 0) {
                 this.ticketEncontrado = false; // No se encontraron tickets
@@ -208,7 +209,7 @@ export default {
                     fechaCreacion: item.fechacreacion ? item.fechacreacion.split('T')[0] : null,
                     fechaActualizacion: item.fecha ? item.fecha.split('T')[0] : null,
                     categoria: item.categoria,
-                    observacion: item.observacion,
+                    observacion: item.descripcion,
                     evidencia: item.url,
                 }));
             }
@@ -307,6 +308,16 @@ export default {
             let month = (now.getMonth() + 1).toString();
             month = month.length === 1 ? '0' + month : month;
             let day = now.getDate().toString();
+            day = day.length === 1 ? '0' + day : day;
+            return `${year}-${month}-${day}`;
+        },
+        addOneDay() {
+            let currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + 1);
+            const year = currentDate.getFullYear();
+            let month = (currentDate.getMonth() + 1).toString();
+            month = month.length === 1 ? '0' + month : month;
+            let day = currentDate.getDate().toString();
             day = day.length === 1 ? '0' + day : day;
             return `${year}-${month}-${day}`;
         }

@@ -22,13 +22,13 @@
                 <div class="row" style="margin-left: 10px;">CREACIÓN DE TICKET</div>
                 <div class="row">
                     <div class="col">
-                        <form @submit.prevent="guardarTicket">
+                        <form @submit.prevent="onSubmit">
                             <div class="card p-3">
                                 <div class="form-group row">
                                     <div class="col">
                                         <label for="prioridad">Prioridad:</label>
                                         <select class="custom-select" id="prioridad" style="background-color: #ffffff;"
-                                            v-model="TicketCreado.prioridad" :disabled="disablePriority">
+                                            v-model="form.prioridad" :disabled="disablePriority">
                                             <option disabled selected>SELECCIONE UNA OPCIÓN</option>
                                             <option value="Baja">Baja</option>
                                             <option value="Media">Media</option>
@@ -40,7 +40,7 @@
                                     <div class="col">
                                         <label for="categoria">Categoría:</label>
                                         <select class="custom-select" id="categoria" style="background-color: #ffffff;"
-                                            v-model="TicketCreado.categoria" :disabled="disablePriority">
+                                            v-model="form.categoria" :disabled="disablePriority">
                                             <option disabled selected>SELECCIONE UNA OPCIÓN</option>
                                             <option value="Atención al cliente">Atención al cliente</option>
                                             <option value="Tesorería">Tesorería</option>
@@ -64,7 +64,7 @@
                                     <div class="col">
                                         <label for="residente">Residente:</label>
                                         <select class="custom-select" id="residente" style="background-color: #ffffff;"
-                                            v-model="TicketCreado.usuario" :disabled="disablePriority">
+                                            v-model="form.usuario" :disabled="disablePriority">
                                             <option disabled value="">SELECCIONE UNA OPCIÓN</option>
                                             <option v-for="copropietario in copropietarios" :value="copropietario.id"
                                                 :key="copropietario.id">{{ copropietario.nombre }}</option>
@@ -75,8 +75,8 @@
                                     <div class="col" style="text-align: left; max-width: 33%;">
                                         <label for="resumen">Unidad Habitacional:</label>
                                         <select class="custom-select" id="residente"
-                                            style="background-color: #ffffff; max-width: 100%;"
-                                            v-model="TicketCreado.unidad_habitacional" :disabled="disablePriority">
+                                            style="background-color: #ffffff; max-width: 100%;" v-model="form.unidad"
+                                            :disabled="disablePriority">
                                             <option disabled value="">SELECCIONE UNA OPCIÓN</option>
                                             <option v-for="unidad in unidades" :value="unidad.split('_')[1]"
                                                 :key="unidad.split('_')[1]">{{ unidad.split('_')[1] }}</option>
@@ -96,10 +96,10 @@
                                 <div class="form-group">
                                     <label for="observaciones">Observaciones:</label>
                                     <textarea class="form-control" id="Observacion" rows="5"
-                                        style="resize: none; border-radius: 10px" v-model="TicketCreado.descripcion">
+                                        style="resize: none; border-radius: 10px" v-model="form.descripcion">
                                     </textarea>
                                 </div>
-                                <button class="send-btn">
+                                <button type="submit" class="send-btn">
                                     <span v-if="!isLoading">Enviar</span>
                                     <!-- Mostrar "Actualizar" si la solicitud no está en curso -->
                                     <span v-if="isLoading">Cargando...</span>
@@ -136,6 +136,11 @@ import Busqueda from "@/components/Busqueda.vue"; // Importa el componente Busqu
 import Empresa from "@/components/Empresa.vue"; // Importa el componente Empresa
 import ImagenLateral from "@/components/ImagenLateral.vue"; // Importa el componente ImagenLateral
 import axios from 'axios';
+import { createTicket } from "../../controllers/user.controller"
+import { reactive } from 'vue'
+import { db } from '../firebase.js'; // Asegúrate de que la ruta al archivo firebase.js sea correcta
+import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref } from 'vue';
 
 export default {
     name: "Tickets",
@@ -162,15 +167,82 @@ export default {
                 prioridad: null,
                 categoria: null,
                 // tipo: null,
-                unidad_habitacional: null,
+                unidad: null,
                 foto: "",
                 descripcion: "",
                 inmueble: JSON.parse(localStorage.getItem('empresaSeleccionada')).nombre,
             },
         };
     },
+    setup() {
+        const now = new Date();
+        const offset = now.getTimezoneOffset() * 60000; // Obtén el desfase horario en milisegundos
+        const localDate = new Date(now - offset); // Ajusta la fecha a la zona horaria local
+
+        const form = reactive({
+            id: '',
+            usuario: '',
+            prioridad: '',
+            categoria: '',
+            unidad: '',
+            descripcion: '', //observacion
+            foto: '',
+            inmueble: '',
+            estado: 'Abierto',
+            fecha: localDate.toISOString(), // Convierte la fecha local a una cadena de texto
+            fechacreacion: localDate.toISOString(),
+            nombresolicitud: '',
+        });
+
+        const copropietarios = JSON.parse(localStorage.getItem('copropietarios')) || [];
+        let isLoading = ref(false); // Variable reactiva para controlar la animación de carga
+        let serverMessage = ref(''); // Variable reactiva para almacenar el mensaje del servidor
+
+        const onSubmit = async () => {
+            isLoading.value = true; // Iniciar la animación de carga
+            try {
+                // Busca el nombre del residente usando el id
+                const residente = copropietarios.find(copropietario => copropietario.id === form.usuario);
+                if (residente) {
+                    form.nombresolicitud = residente.nombre;
+                }
+                const metadataRef = doc(db, 'tickets', 'metadata'); // Referencia al documento 'metadata'
+                let metadataDoc = await getDoc(metadataRef); // Obtiene el documento 'metadata'
+                let ticketId;
+                if (metadataDoc.exists()) { // Verifica si el documento 'metadata' existe
+                    ticketId = metadataDoc.data().lastId; // Obtiene el último id utilizado
+                } else {
+                    ticketId = 0; // Inicializa lastId con 0 si el documento 'metadata' no existe
+                }
+                form.id = (++ticketId).toString(); // Incrementa el contador de tickets, lo convierte a cadena y lo usa como id
+                await updateDoc(metadataRef, { lastId: ticketId }); // Actualiza el último id en el documento 'metadata'
+                await setDoc(doc(db, 'tickets', form.id), { ...form }); // Crea el ticket
+                console.log('Ticket creado con éxito:', form);
+                serverMessage.value = 'Ticket creado con éxito'; // Almacenar el mensaje del servidor
+            } catch (error) {
+                console.error('Error al enviar el ticket:', error.message);
+                serverMessage.value = 'Error al enviar el ticket: ' + error.message; // Almacenar el mensaje del servidor
+            } finally {
+                isLoading.value = false; // Detener la animación de carga
+                // Limpia el formulario
+                form.usuario = '';
+                form.prioridad = '';
+                form.categoria = '';
+                form.unidad = '';
+                form.descripcion = '';
+                form.foto = '';
+                form.inmueble = '';
+                form.estado = '';
+                form.fecha = '';
+                form.fechacreacion = '';
+                form.nombresolicitud = '';
+            }
+        };
+
+        return { form, onSubmit, isLoading, serverMessage };
+    },
     methods: {
-        async guardarTicket() {
+        /* async guardarTicket() {
             try {
                 if (!this.TicketCreado.prioridad || !this.TicketCreado.categoria || !this.TicketCreado.unidad_habitacional || !this.TicketCreado.usuario) {
                     alert('Por favor, complete todos los campos');
@@ -188,7 +260,7 @@ export default {
 
                 console.log('Datos enviados al servidor:', this.TicketCreado);
 
-                const response = await axios.post('https://pagos.starguest.ec:7083/regticket', formData);
+                //const response = await axios.post('https://pagos.starguest.ec:7083/regticket', formData);
                 this.serverMessage = response.data.mensaje; // Almacenar el mensaje del servidor
 
                 console.log('Respuesta del servidor:', response.data);
@@ -197,7 +269,7 @@ export default {
             } finally {
                 this.isLoading = false; // Detener la animación de carga
             }
-        },
+        }, */
         /* guardarTicket() {
             console.log(this.TicketCreado);
             console.log(this.selectedFile);
@@ -233,9 +305,10 @@ export default {
         },
     },
     watch: {
-        'TicketCreado.usuario': function (newVal, oldVal) {
+        'form.usuario': function (newVal, oldVal) {
             if (newVal !== oldVal) {
-                fetch(`https://pagos.starguest.ec:7083/listaunidades/${newVal}`)
+                /* fetch(`https://pagos.starguest.ec:7083/listaunidades/${newVal}`) */
+                fetch(`https://crud-back-mlk9.onrender.com/listaunidades/${newVal}`)
                     .then(response => response.json())
                     .then(data => {
                         this.unidades = data.departamentos;

@@ -49,3 +49,8 @@ export const useLoadUsers = () => {
     return users;
   };
   
+  export const createTicket = async (ticket) => {
+    const ticketsCollection = collection(db, 'tickets');
+    const docRef = await addDoc(ticketsCollection, ticket);
+    return docRef.id; // Devuelve el ID del nuevo documento
+}

@@ -90,7 +90,8 @@ export default {
         };
     },
     mounted() {
-        fetch('https://pagos.starguest.ec:7083/listainmuebles')
+        /* fetch('https://pagos.starguest.ec:7083/listainmuebles') */
+        fetch('https://crud-back-mlk9.onrender.com/listainmuebles')
             .then(response => response.json())
             .then(data => {
                 this.conjuntos = data;
@@ -136,7 +137,8 @@ export default {
             const empresa = this.conjuntos.find(item => item.nombre === nombre);
             if (empresa) {
                 localStorage.setItem('empresaSeleccionada', JSON.stringify(empresa));
-                fetch(`https://pagos.starguest.ec:7083/listacopropietarios/${empresa.id}`)
+                /* fetch(`https://pagos.starguest.ec:7083/listacopropietarios/${empresa.id}`) */
+                fetch(`https://crud-back-mlk9.onrender.com/listacopropietarios/${empresa.id}`)
                     .then(response => response.json())
                     .then(data => {
                         this.copropietarios = data;

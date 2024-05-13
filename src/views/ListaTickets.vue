@@ -68,9 +68,9 @@
                                 <label for="estatus">Estatus:</label>
                                 <select v-model="Busqueda.estatus" class="form-control" style="appearance: auto;">
                                     <option disabled selected>SELECCIONE UNA OPCIÓN</option>
-                                    <option value="ABIERTO">Abierto</option>
+                                    <option value="Abierto">Abierto</option>
                                     <!-- <option value="CERRADO">Cerrado</option> -->
-                                    <option value="DEMORADO">Demorado</option>
+                                    <option value="Demorado">Demorado</option>
                                 </select>
                             </div>
                             <div class="col-4">
@@ -148,7 +148,7 @@ export default {
             ticketEncontrado: null,
             Busqueda: {
                 fechaInicial: this.getCurrentDate(), // Inicializa con la fecha actual
-                fechaFinal: this.getCurrentDate(), // Inicializa con la fecha actual
+                fechaFinal: this.addOneDay(), // Inicializa con la fecha actual
                 categoria: '',
                 nombre: '',
                 id: '',
@@ -181,20 +181,21 @@ export default {
         async guardarBusqueda() {
             const fechaInicial = this.Busqueda.fechaInicial;
             const fechaFinal = this.Busqueda.fechaFinal;
-            const response = await axios.get(`https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`);
+            const response = await axios.get(`https://crud-back-mlk9.onrender.com/listaticketweb/${fechaInicial}/${fechaFinal}`);
+            /* const response = await axios.get(`https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`); */
 
-            if (response.data.length === 0 || !response.data.some(ticket => ticket.estado === "ABIERTO" || ticket.estado === "DEMORADO")) {
+            if (response.data.length === 0 || !response.data.some(ticket => ticket.estado === "Abierto" || ticket.estado === "Demorado")) {
                 this.ticketEncontrado = false; // No se encontraron tickets o no hay tickets en estado "ABIERTO" o "DEMORADO"
                 this.reportData = [];
             } else {
                 this.ticketEncontrado = true; // Se encontraron tickets
                 this.reportData = response.data
-                    .filter(ticket => ticket.estado === "ABIERTO" || ticket.estado === "DEMORADO")
+                    .filter(ticket => ticket.estado === "Abierto" || ticket.estado === "Demorado")
                     .map(item => ({
                         id: item.id,
                         estatus: item.estado,
                         prioridad: item.prioridad,
-                        observacion: item.observacion,
+                        observacion: item.descripcion,
                         categoria: item.categoria,
                         fechaCreacion: item.fechacreacion.split('T')[0],
                         unidad: item.unidad,
@@ -216,6 +217,16 @@ export default {
         },
         getCurrentDate() {
             const now = new Date();
+            const year = now.getFullYear();
+            let month = (now.getMonth() + 1).toString();
+            month = month.length === 1 ? '0' + month : month;
+            let day = now.getDate().toString();
+            day = day.length === 1 ? '0' + day : day;
+            return `${year}-${month}-${day}`;
+        },
+        addOneDay() {
+            const now = new Date();
+            now.setDate(now.getDate() + 1);
             const year = now.getFullYear();
             let month = (now.getMonth() + 1).toString();
             month = month.length === 1 ? '0' + month : month;

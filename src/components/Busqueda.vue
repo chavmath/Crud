@@ -75,10 +75,11 @@ export default {
       try {
         // Ajusta las fechas según tus necesidades
         const fechaInicial = "2023-04-01"; // Fecha antigua
-        const fechaFinal = new Date().toISOString().split("T")[0]; // Fecha actual
+        const fechaFinal = "2024-12-01"; // Fecha actual
 
         const response = await axios.get(
-          `https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`
+          /* `https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}` */
+          `https://crud-back-mlk9.onrender.com/listaticketweb/${fechaInicial}/${fechaFinal}`
         );
 
         // Filtra los resultados para mostrar solo el ticket con el ID buscado
