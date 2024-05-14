@@ -148,7 +148,7 @@ export default {
             ticketEncontrado: null,
             Busqueda: {
                 fechaInicial: this.getCurrentDate(), // Inicializa con la fecha actual
-                fechaFinal: this.addOneDay(), // Inicializa con la fecha actual
+                fechaFinal: this.getCurrentDate(), // Inicializa con la fecha actual
                 categoria: '',
                 nombre: '',
                 id: '',
@@ -183,8 +183,8 @@ export default {
             const fechaFinal = this.Busqueda.fechaFinal;
             const response = await axios.get(`https://crud-back-mlk9.onrender.com/listaticketweb/${fechaInicial}/${fechaFinal}`);
             /* const response = await axios.get(`https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`); */
-
-            if (response.data.length === 0 || !response.data.some(ticket => ticket.estado === "Abierto" || ticket.estado === "En proceso")) {
+            
+            if (response.data.length === 0 || !response.data.some(ticket => ticket.estado === "Abierto" || ticket.estado === "En proceso")) { //filtrar por conjunto usando .nombre localstorage comparando con ticket.inmueble??
                 this.ticketEncontrado = false; // No se encontraron tickets o no hay tickets en estado "ABIERTO" o "DEMORADO"
                 this.reportData = [];
             } else {
@@ -224,7 +224,7 @@ export default {
             day = day.length === 1 ? '0' + day : day;
             return `${year}-${month}-${day}`;
         },
-        addOneDay() {
+        /* addOneDay() {
             const now = new Date();
             now.setDate(now.getDate() + 1);
             const year = now.getFullYear();
@@ -233,7 +233,7 @@ export default {
             let day = now.getDate().toString();
             day = day.length === 1 ? '0' + day : day;
             return `${year}-${month}-${day}`;
-        }
+        } */
     },
 };
 </script>

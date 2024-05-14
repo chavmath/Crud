@@ -4,7 +4,7 @@
     <div class="col-1 separator">
       <div class="separator"></div>
     </div>
-    <div class="col user-section">
+    <div class="col user-section" style="display: flex; align-items: center; justify-content: center;">
       <img class="profile-pic" src="@/assets/LogoHabitat.png" alt="Foto de perfil" />
       <div class="username">{{ nombre }} {{ apellido }}</div>
       <div class="dropdown">

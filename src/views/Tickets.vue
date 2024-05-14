@@ -186,8 +186,8 @@ export default {
             categoria: '',
             unidad: '',
             descripcion: '', //observacion
-            /* foto: '',
-            inmueble: '', */
+            //foto: '',
+            inmueble: JSON.parse(localStorage.getItem('empresaSeleccionada')).nombre,
             estado: 'Abierto',
             fecha: localDate.toISOString(), // Convierte la fecha local a una cadena de texto
             fechacreacion: localDate.toISOString(),
@@ -232,8 +232,8 @@ export default {
                 form.categoria = '';
                 form.unidad = '';
                 form.descripcion = '';
-                /* form.foto = '';
-                form.inmueble = ''; */
+                //form.foto = '';
+                form.inmueble = '';
                 form.estado = '';
                 form.fecha = '';
                 form.fechacreacion = '';

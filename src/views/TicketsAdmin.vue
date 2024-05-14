@@ -139,7 +139,7 @@
                                 <div class="col" style="padding: 0px;">
                                         <label for="categoria">Asignar a:</label>
                                         <select class="custom-select" id="categoria" style="background-color: #ffffff;"
-                                            v-model="TicketMod.categoria" :disabled="disablePriority">
+                                            v-model="TicketMod.categoria">
                                             <option disabled selected>SELECCIONE UNA OPCIÓN</option>
                                             <option value="Atención al cliente">Atención al cliente</option>
                                             <option value="Tesorería">Tesorería</option>

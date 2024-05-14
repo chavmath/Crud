@@ -61,7 +61,7 @@
                             <option disabled selected>SELECCIONE UNA OPCIÓN</option>
                             <option value="Abierto">Abierto</option>
                             <option value="Cerrado">Cerrado</option>
-                            <option value="Demorado">Demorado</option>
+                            <option value="En proceso">En proceso</option>
                             <option value="Duplicado">Duplicado</option>
                         </select>
                     </div>
@@ -160,7 +160,7 @@ export default {
             itemsPerPage: 5,
             Busqueda: {
                 fechaInicial: this.getCurrentDate(), // Inicializa con la fecha actual
-                fechaFinal: this.addOneDay(), // Inicializa con la fecha actual
+                fechaFinal: this.getCurrentDate(), // Inicializa con la fecha actual
                 categoria: '',
                 nombre: '',
                 estatus: '',
@@ -194,6 +194,8 @@ export default {
             const fechaFinal = this.Busqueda.fechaFinal;
             /* const response = await axios.get(`https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`); */
             const response = await axios.get(`https://crud-back-mlk9.onrender.com/listaticketweb/${fechaInicial}/${fechaFinal}`);
+
+            //filtrar por conjunto usando .nombre localstorage comparando con ticket.inmueble?? con metodo en listaTickets
 
             if (response.data.length === 0) {
                 this.ticketEncontrado = false; // No se encontraron tickets
@@ -311,7 +313,7 @@ export default {
             day = day.length === 1 ? '0' + day : day;
             return `${year}-${month}-${day}`;
         },
-        addOneDay() {
+        /* addOneDay() {
             let currentDate = new Date();
             currentDate.setDate(currentDate.getDate() + 1);
             const year = currentDate.getFullYear();
@@ -320,7 +322,7 @@ export default {
             let day = currentDate.getDate().toString();
             day = day.length === 1 ? '0' + day : day;
             return `${year}-${month}-${day}`;
-        }
+        } */
     },
 };
 </script>
