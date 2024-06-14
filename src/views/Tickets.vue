@@ -33,8 +33,6 @@
                                             <option value="Baja">Baja</option>
                                             <option value="Media">Media</option>
                                             <option value="Alta">Alta</option>
-                                            <!-- <option value="Normal">Normal</option>
-                                            <option value="Urgente">Urgente</option> -->
                                         </select>
                                     </div>
                                     <div class="col">
@@ -51,16 +49,6 @@
                                             <option value="Otros">Otros</option>
                                         </select>
                                     </div>
-                                    <!-- <div class="col">
-                                        <label for="tipo">Tipo:</label>
-                                        <select class="custom-select" id="tipo" style="background-color: #ffffff;"
-                                            v-model="TicketCreado.tipo" @change="checkPriorityOptions">
-                                            <option disabled selected>SELECCIONE UNA OPCIÓN</option>
-                                            <option value="tipo1">Atención al cliente</option>
-                                            <option value="tipo2">Queja</option>
-                                            <option value="tipo3">Sugerencia</option>
-                                        </select>
-                                    </div> -->
                                     <div class="col">
                                         <label for="residente">Residente:</label>
                                         <select class="custom-select" id="residente" style="background-color: #ffffff;"
@@ -81,16 +69,6 @@
                                             <option v-for="unidad in unidades" :value="unidad.split('_')[1]"
                                                 :key="unidad.split('_')[1]">{{ unidad.split('_')[1] }}</option>
                                         </select>
-                                    </div>
-                                    <div class="col-5" style="margin-left: 0px;">
-                                        <label
-                                            style="text-align: left; display: block; margin: 10px 0px 10px 15px;">Evidencia:</label>
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="foto"
-                                                placeholder="JPG / PDF" accept=".jpg, .png, .pdf"
-                                                @change="handleFileUpload" />
-                                            <label class="custom-file-label" for="foto">{{ fileName }}</label>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -136,37 +114,32 @@ import Busqueda from "@/components/Busqueda.vue"; // Importa el componente Busqu
 import Empresa from "@/components/Empresa.vue"; // Importa el componente Empresa
 import ImagenLateral from "@/components/ImagenLateral.vue"; // Importa el componente ImagenLateral
 import axios from 'axios';
-import { createTicket } from "../../controllers/user.controller"
 import { reactive } from 'vue'
-import { db } from '../firebase.js'; // Asegúrate de que la ruta al archivo firebase.js sea correcta
+import { db } from '../firebase.js'; 
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref } from 'vue';
 
 export default {
     name: "Tickets",
     components: {
-        Logo, // Registra el componente Logo
-        Usuario, // Registra el componente Usuario
-        MenuCliente, // Registra el componente MenuCliente
-        Busqueda, // Registra el componente Busqueda
+        Logo,
+        Usuario,
+        MenuCliente,
+        Busqueda,
         Empresa,
         ImagenLateral,
     },
     data() {
         return {
-            selectedFile: "",
             disablePriority: false,
             copropietarios: JSON.parse(localStorage.getItem('copropietarios')) || [],
             unidades: [],
             serverMessage: null,
             isLoading: false,
-            fileName: 'Seleccione un archivo (PDF/PNG)', // Agregar esto
             TicketCreado: {
                 usuario: null,
-                /* responsable: "VILLACRÉS EDISON JAVIER", */
                 prioridad: null,
                 categoria: null,
-                // tipo: null,
                 unidad: null,
                 foto: "",
                 descripcion: "",
@@ -185,14 +158,12 @@ export default {
             prioridad: '',
             categoria: '',
             unidad: '',
-            descripcion: '', //observacion
-            //foto: '',
+            descripcion: '', 
             inmueble: JSON.parse(localStorage.getItem('empresaSeleccionada')).nombre,
             estado: 'Abierto',
             fecha: localDate.toISOString(), // Convierte la fecha local a una cadena de texto
             fechacreacion: localDate.toISOString(),
             nombresolicitud: '',
-            actividad: '',
             responsable: '',
         });
 
@@ -223,7 +194,7 @@ export default {
                 serverMessage.value = 'Ticket creado con éxito'; // Almacenar el mensaje del servidor
             } catch (error) {
                 console.error('Error al enviar el ticket:', error.message);
-                serverMessage.value = 'Error al enviar el ticket: ' + error.message; // Almacenar el mensaje del servidor
+                serverMessage.value = 'Error al enviar el ticket: ' + error.message;
             } finally {
                 isLoading.value = false; // Detener la animación de carga
                 // Limpia el formulario
@@ -232,78 +203,17 @@ export default {
                 form.categoria = '';
                 form.unidad = '';
                 form.descripcion = '';
-                //form.foto = '';
                 form.inmueble = '';
                 form.estado = '';
                 form.fecha = '';
                 form.fechacreacion = '';
                 form.nombresolicitud = '';
-                //form.actividad = '';
-                //form.responsable = '';
             }
         };
 
         return { form, onSubmit, isLoading, serverMessage };
     },
     methods: {
-        /* async guardarTicket() {
-            try {
-                if (!this.TicketCreado.prioridad || !this.TicketCreado.categoria || !this.TicketCreado.unidad_habitacional || !this.TicketCreado.usuario) {
-                    alert('Por favor, complete todos los campos');
-                    return;
-                }
-                this.isLoading = true;
-                const formData = new FormData();
-                formData.append('usuario', this.TicketCreado.usuario);
-                formData.append('prioridad', this.TicketCreado.prioridad);
-                formData.append('categoria', this.TicketCreado.categoria);
-                formData.append('unidad_habitacional', this.TicketCreado.unidad_habitacional);
-                formData.append('descripcion', this.TicketCreado.descripcion);
-                formData.append('foto', this.selectedFile);
-                formData.append('inmueble', this.TicketCreado.inmueble);
-
-                console.log('Datos enviados al servidor:', this.TicketCreado);
-
-                //const response = await axios.post('https://pagos.starguest.ec:7083/regticket', formData);
-                this.serverMessage = response.data.mensaje; // Almacenar el mensaje del servidor
-
-                console.log('Respuesta del servidor:', response.data);
-            } catch (error) {
-                console.error('Error al enviar el ticket:', error.message);
-            } finally {
-                this.isLoading = false; // Detener la animación de carga
-            }
-        }, */
-        /* guardarTicket() {
-            console.log(this.TicketCreado);
-            console.log(this.selectedFile);
-        }, */
-        handleFileOptionSelect(event) {
-            const fileInput = this.$el.querySelector("input[type='file']");
-            if (event.target.value === "Seleccionar archivo") {
-                fileInput.click(); // Abrir el diálogo de selección de archivo
-            }
-        },
-        handleFileUpload(event) {
-            // selección del archivo
-            this.selectedFile = event.target.files[0];
-            this.TicketCreado.foto = event.target.files[0];
-            this.updateFileName(event); // Actualizar el nombre del archivo
-            // console.log(this.selectedFile.name); // Acceder al archivo seleccionado
-        },
-        updateFileName(event) {
-            if (event.target.files.length > 0) {
-                this.fileName = event.target.files[0].name;
-            }
-        },
-        /* checkPriorityOptions() {
-            if (this.TicketCreado.tipo === 'tipo2' || this.TicketCreado.tipo === 'tipo3') {
-                this.TicketCreado.prioridad = null;
-                this.disablePriority = true;
-            } else {
-                this.disablePriority = false;
-            }
-        } */
         closeModal() {
             this.serverMessage = null;
         },
@@ -311,7 +221,6 @@ export default {
     watch: {
         'form.usuario': function (newVal, oldVal) {
             if (newVal !== oldVal) {
-                /* fetch(`https://pagos.starguest.ec:7083/listaunidades/${newVal}`) */
                 fetch(`https://crud-back-mlk9.onrender.com/listaunidades/${newVal}`)
                     .then(response => response.json())
                     .then(data => {

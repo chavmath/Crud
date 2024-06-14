@@ -1,11 +1,5 @@
 <template>
   <div class="sidebar">
-    <!-- <div class="sidebar-item">
-      <router-link to="/inicio" class="sidebar-link" active-class="selected">
-        <img src="@/assets/user.svg" alt="Usuarios" />
-        <span>USUARIOS</span>
-      </router-link>
-    </div> -->
     <div class="sidebar-item">
       <router-link to="/reportes" class="sidebar-link" active-class="selected">
         <img src="@/assets/reporte.svg" alt="Reportes" />

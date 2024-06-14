@@ -90,13 +90,11 @@ export default {
         };
     },
     mounted() {
-        /* fetch('https://pagos.starguest.ec:7083/listainmuebles') */
         fetch('https://crud-back-mlk9.onrender.com/listainmuebles')
             .then(response => response.json())
             .then(data => {
                 this.conjuntos = data;
             });
-
     },
     methods: {
         login() {
@@ -128,20 +126,15 @@ export default {
             // Método para cambiar el mensaje
             this.currentMessageIndex = index;
         },
-        /* seleccionarEmpresa(value) {
-            console.log(value, "Empresa seleccionada");
-            console.log(this.conjuntos);
-        }, */
         seleccionarEmpresa(nombre) {
-            this.empresaSeleccionada = nombre;
-            const empresa = this.conjuntos.find(item => item.nombre === nombre);
-            if (empresa) {
-                localStorage.setItem('empresaSeleccionada', JSON.stringify(empresa));
-                /* fetch(`https://pagos.starguest.ec:7083/listacopropietarios/${empresa.id}`) */
-                fetch(`https://crud-back-mlk9.onrender.com/listacopropietarios/${empresa.id}`)
-                    .then(response => response.json())
+            this.empresaSeleccionada = nombre; // Asigna el nombre de la empresa seleccionada a la propiedad 'empresaSeleccionada'
+            const empresa = this.conjuntos.find(item => item.nombre === nombre); // Busca en 'conjuntos' la empresa cuyo nombre coincida con el nombre proporcionado
+            if (empresa) { // Si se encuentra una empresa con el nombre dado
+                localStorage.setItem('empresaSeleccionada', JSON.stringify(empresa)); // Guarda la información de la empresa seleccionada en el localStorage
+                fetch(`https://crud-back-mlk9.onrender.com/listacopropietarios/${empresa.id}`) // Realiza una solicitud HTTP GET para obtener la lista de copropietarios de la empresa seleccionada
+                    .then(response => response.json()) // Convierte la respuesta a formato JSON
                     .then(data => {
-                        this.copropietarios = data;
+                        this.copropietarios = data; // Asigna los datos de los copropietarios a la propiedad 'copropietarios'
                         localStorage.setItem('copropietarios', JSON.stringify(data));
                     });
             }

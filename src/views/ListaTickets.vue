@@ -33,20 +33,7 @@
                                     <label for="fechaFinal">Fecha final:</label>
                                     <input type="date" v-model="Busqueda.fechaFinal" class="form-control"
                                         placeholder="Fecha final">
-                                </div>
-                                <!-- <div class="col-2 select-container">
-                            <label for="categoria">Categoría:</label>
-                            <select v-model="Busqueda.categoria" class="form-control categoria">
-                                <option value="Atención al cliente">Atención al cliente</option>
-                                <option value="Tesorería">Tesorería</option>
-                                <option value="Mantenimieto">Mantenimieto</option>
-                                <option value="Recompensas">Recompensas</option>
-                                <option value="Sugerencias">Sugerencias</option>
-                                <option value="Inconformidades">Inconformidades</option>
-                                <option value="Otros">Otros</option>
-                            </select>
-                            <span class="select-arrow"></span>
-                        </div> -->
+                                </div>                                
                                 <div class="col-4">
                                     <button type="submit" class="save-btn" @click="guardarBusqueda"
                                         style="margin-top: 30px;">Buscar</button>
@@ -69,7 +56,6 @@
                                 <select v-model="Busqueda.estatus" class="form-control" style="appearance: auto;">
                                     <option disabled selected>SELECCIONE UNA OPCIÓN</option>
                                     <option value="Abierto">Abierto</option>
-                                    <!-- <option value="CERRADO">Cerrado</option> -->
                                     <option value="En proceso">En proceso</option>
                                 </select>
                             </div>
@@ -136,10 +122,10 @@ import axios from 'axios';
 export default {
     name: "ListaTickets",
     components: {
-        Logo, // Registra el componente Logo
-        Usuario, // Registra el componente Usuario
-        MenuCliente, // Registra el componente MenuCliente
-        Busqueda, // Registra el componente Busqueda
+        Logo,
+        Usuario,
+        MenuCliente,
+        Busqueda,
         Empresa,
         ImagenLateral,
     },
@@ -161,7 +147,8 @@ export default {
                 categoria: '',
                 fechaCreacion: '',
                 unidad: '',
-                nombre: ''
+                nombre: '',
+                executionTime: '',
             },
             Titulos: ['Ticket', 'Estado', 'Prioridad', 'Residente', 'Unidad Hab.', 'Categoría', 'Observación', 'Fecha Creación'],
             reportData: []
@@ -182,10 +169,9 @@ export default {
             const fechaInicial = this.Busqueda.fechaInicial;
             const fechaFinal = this.Busqueda.fechaFinal;
             const response = await axios.get(`https://crud-back-mlk9.onrender.com/listaticketweb/${fechaInicial}/${fechaFinal}`);
-            /* const response = await axios.get(`https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`); */
-            
-            if (response.data.length === 0 || !response.data.some(ticket => ticket.estado === "Abierto" || ticket.estado === "En proceso")) { //filtrar por conjunto usando .nombre localstorage comparando con ticket.inmueble??
-                this.ticketEncontrado = false; // No se encontraron tickets o no hay tickets en estado "ABIERTO" o "DEMORADO"
+
+            if (response.data.length === 0 || !response.data.some(ticket => ticket.estado === "Abierto" || ticket.estado === "En proceso")) {
+                this.ticketEncontrado = false; // No se encontraron tickets o no hay tickets en estado "ABIERTO" o "En proceso"
                 this.reportData = [];
             } else {
                 this.ticketEncontrado = true; // Se encontraron tickets
@@ -200,7 +186,8 @@ export default {
                         fechaCreacion: item.fechacreacion.split('T')[0],
                         unidad: item.unidad,
                         nombre: item.nombresolicitud,
-                        foto: item.url
+                        executionTime: item.executionTime,
+                        fechaCreacionCompleta: item.fechacreacion,
                     }));
             }
         },
@@ -224,16 +211,6 @@ export default {
             day = day.length === 1 ? '0' + day : day;
             return `${year}-${month}-${day}`;
         },
-        /* addOneDay() {
-            const now = new Date();
-            now.setDate(now.getDate() + 1);
-            const year = now.getFullYear();
-            let month = (now.getMonth() + 1).toString();
-            month = month.length === 1 ? '0' + month : month;
-            let day = now.getDate().toString();
-            day = day.length === 1 ? '0' + day : day;
-            return `${year}-${month}-${day}`;
-        } */
     },
 };
 </script>

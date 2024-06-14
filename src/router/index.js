@@ -14,14 +14,6 @@ const router = createRouter({
       name: "login",
       component: Login,
     },
-    /* {
-      path: "/inicio",
-      name: "inicio",
-      component: Inicio,
-      meta: {
-        requiresAuth: true,
-      },
-    }, */
     {
       path: "/reportes",
       name: "reportes",
@@ -58,19 +50,19 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
- const auth = localStorage.getItem("nombreusuario");
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (auth) {
-      next();
+ const auth = localStorage.getItem("nombreusuario");// Obtiene el elemento "nombreusuario" del localStorage, que representa el estado de autenticación
+  if (to.matched.some((record) => record.meta.requiresAuth)) { // Verifica si alguna de las rutas coincidentes requiere autenticación
+    if (auth) {  // Si el usuario está autenticado
+      next(); // Permite el acceso a la ruta
     } else {
-      if(to.name !== 'login'){
-        next({ name: 'login' });
+      if(to.name !== 'login'){ // Si el usuario no está autenticado y la ruta no es la de login
+        next({ name: 'login' }); // Redirige al usuario a la página de login
       } else{
-        next();
+        next(); // Si la ruta es la de login, permite el acceso a la ruta
       }
     }
 } else {
-  next();
+  next(); // Si la ruta no requiere autenticación, permite el acceso a la ruta
 }
 });
 

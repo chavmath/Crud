@@ -62,7 +62,15 @@
                             <option value="Abierto">Abierto</option>
                             <option value="Cerrado">Cerrado</option>
                             <option value="En proceso">En proceso</option>
-                            <option value="Duplicado">Duplicado</option>
+                            <option value="Demorado">Demorado</option>
+                        </select>
+                    </div>
+                    <div class="col-2 select-container" v-if="Busqueda.estatus === 'Demorado'" style="width: 200px;">
+                        <label for="motivoDemora">Motivo de Demora:</label>
+                        <select v-model="Busqueda.motivoDemora" class="form-control" style="appearance: auto;">
+                            <option disabled selected>SELECCIONE UNA OPCIÓN</option>
+                            <option value="Injustificado">Injustificado</option>
+                            <option value="Falta de Recursos">Falta de Recursos</option>
                         </select>
                     </div>
                     <div class="col-2 select-container" style="width: 200px;">
@@ -95,19 +103,15 @@
                             <tr v-for="data in paginatedData" :key="data.id">
                                 <td>{{ data.ticket }}</td>
                                 <td>{{ data.estatus }}</td>
+                                <td>{{ data.motivoDemora }}</td>
                                 <td>{{ data.prioridad }}</td>
                                 <td>{{ data.nombres }}</td>
                                 <td>{{ data.unidadHab }}</td>
                                 <td>{{ data.fechaCreacion }}</td>
                                 <td>{{ data.fechaActualizacion }}</td>
                                 <td>{{ data.categoria }}</td>
-                                <!-- <td>{{ data.telefono }}</td> -->
-                                <!-- <td style="max-width: 150px;">{{ data.observacion }}</td> -->
                                 <td>{{ data.observacion }}</td>
-                                <td>
-                                    <img :src="data.evidencia" alt="No se mandó evidencia"
-                                        style="width: 100px; max-height: 50px;">
-                                </td>
+                                <td>{{ data.responsable }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -115,6 +119,21 @@
                         <div v-for="(page, index) in pageCount" :key="index" class="slider-button"
                             :class="{ active: currentPage === index }" @click="goToPage(index)"></div>
                     </div>
+                </div>
+                <div class="analysis-section">
+                    <h3>Análisis Estadístico de Tickets</h3>
+                    <div class="statistics">
+                        <p>Total de Tickets: {{ totalTickets }}</p>
+                        <p>Tickets Cerrados Normalmente: {{ closedTickets }} ({{ closedPercentage }}%)</p>
+                        <p>Tickets Demorados: {{ delayedTickets }} ({{ delayedPercentage }}%)</p>
+                        <p>Tiempo Promedio de Resolución (Cerrados Normalmente): {{ averageResolutionTimeClosed }}
+                            minutos</p>
+                        <p>Tiempo Promedio de Resolución (Demorados): {{ averageResolutionTimeDelayed }} minutos</p>
+                        <p>Ticket que más se demoró en cerrar: {{ ticketMaximoDemora }}</p>
+                        <p>Conjunto Residencial: {{ empresaSeleccionada.nombre }}</p>
+                        <p>Administrador más eficiente: {{ adminMasResolutivo }}</p>
+                    </div>
+                    <canvas id="resolutionTimeChart"></canvas>
                 </div>
             </div>
             <div class="col-2" style="padding: 0px;">
@@ -142,14 +161,16 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import * as XLSX from "xlsx";
 import axios from "axios";
+import { Chart, registerables } from 'chart.js'; // Importa Chart y registerables
+Chart.register(...registerables); // Registra todos los componentes necesarios
 
 export default {
     name: "Reportes",
     components: {
-        Logo, // Registra el componente Logo
-        Usuario, // Registra el componente Usuario
-        MenuCliente, // Registra el componente MenuCliente
-        Busqueda, // Registra el componente Busqueda
+        Logo,
+        Usuario,
+        MenuCliente,
+        Busqueda,
         Empresa,
         ImagenLateral,
     },
@@ -164,9 +185,11 @@ export default {
                 categoria: '',
                 nombre: '',
                 estatus: '',
+                motivoDemora: ''
             },
-            Titulos: ['Ticket', 'Estado', 'Prioridad', 'Residente', 'Unidad Hab.', 'Fecha Creación', 'Fecha Actualización', 'Categoria',/*  'Teléfono', */ 'Observación', 'Evidencia'],
-            reportData: []
+            Titulos: ['Ticket', 'Estado', 'Motivo (Demorado)', 'Prioridad', 'Residente', 'Unidad Hab.', 'Fecha Creación', 'Fecha Actualización', 'Categoria', 'Observación', 'Responsable'],
+            reportData: [],
+            empresaSeleccionada: JSON.parse(localStorage.getItem('empresaSeleccionada'))
         };
     },
     computed: {
@@ -176,7 +199,9 @@ export default {
                     || (data.fechaCreacion && data.fechaCreacion.includes(this.Busqueda.nombre)) ||
                     (data.nombres && data.nombres.toLowerCase().includes(this.Busqueda.nombre.toLowerCase()))) &&
                 (this.Busqueda.estatus === '' || data.estatus === this.Busqueda.estatus) &&
-                (this.Busqueda.categoria === '' || data.categoria === this.Busqueda.categoria)
+                (this.Busqueda.categoria === '' || data.categoria === this.Busqueda.categoria) &&
+                (this.Busqueda.motivoDemora === '' || data.motivoDemora === this.Busqueda.motivoDemora) &&
+                (data.inmueble && data.inmueble.toLowerCase().includes(this.empresaSeleccionada.nombre.toLowerCase()))
             );
         },
         paginatedData() {
@@ -186,44 +211,99 @@ export default {
         },
         pageCount() {
             return Math.ceil(this.filteredData.length / this.itemsPerPage);
+        },
+        totalTickets() {
+            return this.filteredData.length;
+        },
+        closedTickets() {
+            return this.filteredData.filter(ticket => ticket.estatus === 'Cerrado' && !ticket.motivoDemora).length;
+        },
+        delayedTickets() {
+            return this.filteredData.filter(ticket => ticket.motivoDemora).length;
+        },
+        closedPercentage() {
+            return ((this.closedTickets / this.totalTickets) * 100).toFixed(2);
+        },
+        delayedPercentage() {
+            return ((this.delayedTickets / this.totalTickets) * 100).toFixed(2);
+        },
+        averageResolutionTimeClosed() {
+            const closedTickets = this.filteredData.filter(ticket => ticket.estatus === 'Cerrado' && !ticket.motivoDemora);
+            if (closedTickets.length === 0) return 0; // Manejar el caso cuando no hay tickets cerrados normalmente
+            const totalResolutionTime = closedTickets.reduce((acc, ticket) => acc + this.calculateTimeDifference(ticket.fechaCreacion, ticket.fechaActualizacion), 0);
+            return (totalResolutionTime / closedTickets.length).toFixed(2);
+        },
+        averageResolutionTimeDelayed() {
+            const delayedTickets = this.filteredData.filter(ticket => ticket.motivoDemora);
+            if (delayedTickets.length === 0) return 0; // Manejar el caso cuando no hay tickets demorados
+            const totalResolutionTime = delayedTickets.reduce((acc, ticket) => acc + this.calculateTimeDifference(ticket.fechaCreacion, ticket.fechaActualizacion), 0);
+            return (totalResolutionTime / delayedTickets.length).toFixed(2);
+        },
+        ticketMaximoDemora() {
+            if (this.filteredData.length === 0) return "N/A"; // Si no hay datos en filteredData, retorna "N/A"
+            const ticket = this.filteredData.reduce((max, ticket) => {  // reduce para encontrar el ticket con la mayor demora
+                const timeDifference = this.calculateTimeDifference(ticket.fechaCreacion, ticket.fechaActualizacion); // Calcula la diferencia de tiempo entre la fecha de creación y la fecha de actualización del ticket actual
+                return timeDifference > max.timeDifference ? { ...ticket, timeDifference } : max; // Si la diferencia de tiempo del ticket actual es mayor que la del ticket máximo actual, actualiza el ticket máximo
+            }, { timeDifference: 0 }); // Valor inicial para el ticket máximo, con una diferencia de tiempo de 0
+            return `${ticket.ticket} (${ticket.timeDifference.toFixed(2)} minutos)`; // Retorna una cadena con el identificador del ticket y la demora en minutos, en dos decimales
+        },
+        adminMasResolutivo() {
+            if (this.filteredData.length === 0) return "N/A";
+            const admins = {};
+            this.filteredData.forEach(ticket => {
+                if (ticket.responsable) {
+                    if (!admins[ticket.responsable]) {
+                        admins[ticket.responsable] = 0;
+                    }
+                    admins[ticket.responsable]++;
+                }
+            });
+            const maxAdmin = Object.keys(admins).reduce((a, b) => admins[a] > admins[b] ? a : b, '');
+            const maxAdminTickets = admins[maxAdmin];
+            const maxAdminPercentage = ((maxAdminTickets / this.filteredData.length) * 100).toFixed(2);
+            return maxAdmin ? `${maxAdmin} (${maxAdminTickets} tickets, ${maxAdminPercentage}%)` : "N/A";
         }
     },
     methods: {
         async buscar() {
             const fechaInicial = this.Busqueda.fechaInicial;
             const fechaFinal = this.Busqueda.fechaFinal;
-            /* const response = await axios.get(`https://pagos.starguest.ec:7083/listaticketweb/${fechaInicial}/${fechaFinal}`); */
             const response = await axios.get(`https://crud-back-mlk9.onrender.com/listaticketweb/${fechaInicial}/${fechaFinal}`);
 
-            //filtrar por conjunto usando .nombre localstorage comparando con ticket.inmueble?? con metodo en listaTickets
-
             if (response.data.length === 0) {
-                this.ticketEncontrado = false; // No se encontraron tickets
+                this.ticketEncontrado = false;
                 this.reportData = [];
             } else {
-                this.ticketEncontrado = true; // Se encontraron tickets
+                this.ticketEncontrado = true;
                 this.reportData = response.data.map(item => ({
                     ticket: item.id,
                     estatus: item.estado,
                     prioridad: item.prioridad,
                     nombres: item.nombresolicitud,
                     unidadHab: item.unidad,
-                    fechaCreacion: item.fechacreacion ? item.fechacreacion.split('T')[0] : null,
-                    fechaActualizacion: item.fecha ? item.fecha.split('T')[0] : null,
+                    fechaCreacion: item.fechacreacion ? item.fechacreacion.split('T')[0] + ', ' + item.fechacreacion.split('T')[1].split(':')[0] + ':' + item.fechacreacion.split('T')[1].split(':')[1] : null,
+                    fechaActualizacion: item.fecha ? item.fecha.split('T')[0] + ', ' + item.fecha.split('T')[1].split(':')[0] + ':' + item.fecha.split('T')[1].split(':')[1] : null,
                     categoria: item.categoria,
                     observacion: item.descripcion,
-                    evidencia: item.url,
+                    motivoDemora: item.motivoDemora,
+                    responsable: item.responsable,
+                    inmueble: item.inmueble
                 }));
+                this.renderChart();
             }
         },
         cerrarModal() {
             this.ticketEncontrado = null;
         },
         limpiarFiltros() {
-            // Limpia los filtros de nombre y prioridad
-            this.Busqueda.nombre = '';
-            this.Busqueda.estatus = '';
-            this.Busqueda.categoria = '';
+            this.Busqueda = {
+                fechaInicial: this.getCurrentDate(),
+                fechaFinal: this.getCurrentDate(),
+                categoria: '',
+                nombre: '',
+                estatus: '',
+                motivoDemora: ''
+            };
         },
         goToPage(page) {
             this.currentPage = page;
@@ -257,6 +337,7 @@ export default {
                 return [
                     obj.ticket.toUpperCase(),
                     obj.estatus.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase()), // Capitalizar solo la primera letra de cada palabra
+                    capitalizeFirstLetter(obj.motivoDemora.toLowerCase()),
                     obj.prioridad.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase()), // Capitalizar solo la primera letra de cada palabra
                     capitalizeFirstLetter(obj.nombres.toLowerCase()), // Capitalizar solo la primera letra de cada palabra, manteniendo las tildes
                     capitalizeFirstLetter(obj.unidadHab.toLowerCase()), // Capitalizar solo la primera letra de cada palabra, manteniendo las tildes
@@ -264,7 +345,6 @@ export default {
                     obj.fechaActualizacion.toUpperCase(),
                     capitalizeFirstLetter(obj.categoria.toLowerCase()), // Capitalizar solo la primera letra de cada palabra, manteniendo las tildes
                     capitalizeFirstLetter(obj.observacion.toLowerCase()), // Capitalizar solo la primera letra de cada palabra, manteniendo las tildes
-                    obj.evidencia
                 ];
             });
             const headers = this.Titulos;
@@ -278,14 +358,14 @@ export default {
                 columnStyles: {
                     0: { cellWidth: columnWidths[0] }, // Aplicar el ancho definido para la primera columna
                     1: { cellWidth: columnWidths[1] }, // El ancho de la segunda columna se calculará automáticamente
-                    2: { cellWidth: columnWidths[2] }, // El ancho de la tercera columna se calculará automáticamente
-                    3: { cellWidth: columnWidths[3] }, // El ancho de la cuarta columna se calculará automáticamente
-                    4: { cellWidth: columnWidths[4] }, // El ancho de la quinta columna se calculará automáticamente
-                    5: { cellWidth: columnWidths[5] }, // El ancho de la sexta columna se calculará automáticamente
-                    6: { cellWidth: columnWidths[6] }, // El ancho de la séptima columna se calculará automáticamente
-                    7: { cellWidth: columnWidths[7] }, // El ancho de la octava columna se calculará automáticamente
-                    8: { cellWidth: columnWidths[8] }, // El ancho de la novena columna se calculará automáticamente
-                    9: { cellWidth: columnWidths[9] }, // El ancho de la décima columna se calculará automáticamente
+                    2: { cellWidth: columnWidths[2] },
+                    3: { cellWidth: columnWidths[3] },
+                    4: { cellWidth: columnWidths[4] },
+                    5: { cellWidth: columnWidths[5] },
+                    6: { cellWidth: columnWidths[6] },
+                    7: { cellWidth: columnWidths[7] },
+                    8: { cellWidth: columnWidths[8] },
+                    9: { cellWidth: columnWidths[9] },
                 },
                 headStyles: {
                     fillColor: [129, 13, 120], // Color de fondo de los headers (negro)
@@ -313,16 +393,57 @@ export default {
             day = day.length === 1 ? '0' + day : day;
             return `${year}-${month}-${day}`;
         },
-        /* addOneDay() {
-            let currentDate = new Date();
-            currentDate.setDate(currentDate.getDate() + 1);
-            const year = currentDate.getFullYear();
-            let month = (currentDate.getMonth() + 1).toString();
-            month = month.length === 1 ? '0' + month : month;
-            let day = currentDate.getDate().toString();
-            day = day.length === 1 ? '0' + day : day;
-            return `${year}-${month}-${day}`;
-        } */
+        calculateTimeDifference(createdAt, updatedAt) {
+            const createdDate = new Date(createdAt); // Crea objetos Date a partir de las cadenas de fechas de creación y actualización
+            const updatedDate = new Date(updatedAt);
+
+            // Extrae las horas, minutos y segundos de las fecha y los convierte a minutos
+            const createdTime = createdDate.getHours() * 60 + createdDate.getMinutes() + createdDate.getSeconds() / 60;
+            const updatedTime = updatedDate.getHours() * 60 + updatedDate.getMinutes() + updatedDate.getSeconds() / 60;
+
+            // Calcula la diferencia en minutos entre la fecha de actualización y la fecha de creación
+            let differenceInMinutes = updatedTime - createdTime;
+
+            // Si la diferencia es negativa (lo que significa que la actualización ocurrió el día siguiente), ajusta la diferencia agregando 24 horas (en minutos)
+            if (differenceInMinutes < 0) {
+                differenceInMinutes += 24 * 60;
+            }
+            return differenceInMinutes;
+        },
+        renderChart() {
+            const ctx = document.getElementById('resolutionTimeChart').getContext('2d'); // Obtiene el contexto del canvas con id 'resolutionTimeChart' para dibujar el gráfico
+            if (this.chart) {
+                this.chart.destroy(); // Destruir gráfico previo si existe
+            }
+            this.chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Cerrados Normalmente', 'Demorados'],
+                    datasets: [{
+                        label: 'Tiempo Promedio de Resolución (minutos)',
+                        data: [this.averageResolutionTimeClosed, this.averageResolutionTimeDelayed],
+                        backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+                        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {  // Configura las etiquetas del eje y
+                                callback: function (value) {
+                                    return value + ' min';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        },
+    },
+    mounted() {
+        this.renderChart();
     },
 };
 </script>
@@ -498,5 +619,13 @@ label {
 
 .slider-button.active {
     background-color: #939397;
+}
+
+.analysis-section {
+    margin-top: 20px;
+}
+
+.statistics {
+    margin-bottom: 20px;
 }
 </style>

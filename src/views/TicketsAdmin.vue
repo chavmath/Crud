@@ -92,8 +92,8 @@
                                                 style="width: 100px; cursor: pointer;">
                                                 <option selected>Abierto</option>
                                                 <option value="En proceso">En proceso</option>
+                                                <option value="Demorado">Demorado</option>
                                                 <option value="Cerrado">Cerrado</option>
-                                                <option value="Duplicado">Duplicado</option>
                                             </select>
                                         </div>
                                         <div class="col-1 separator-ticket" style="width: 1px;">
@@ -106,18 +106,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" style="margin-top: 15px;">
-                                <!-- <div class="col" style="padding: 0px;">
-                                    <label for="prioridad">Prioridad:</label>
-                                    <select class="custom-select" id="prioridad" v-model="TicketMod.prioridad">
-                                        <option disabled selected>SELECCIONE UNA OPCIÓN</option>
-                                        <option value="Baja">Baja</option>
-                                        <option value="Media">Media</option>
-                                        <option value="Alta">Alta</option>
-                                        <option value="Normal">Normal</option>
-                                        <option value="Urgente">Urgente</option>
-                                    </select>
-                                </div> -->
+                            <div class="row" style="margin-top: 15px;">                                
                                 <div class="col">
                                     <label for="prioridad">Prioridad:</label>
                                     <input type="text" class="form-control text-center" id="Prioridad"
@@ -125,66 +114,42 @@
                                         style="border-radius: 10px; border-color: gray; height: 28px;"
                                         v-model="TicketMod.prioridad" readonly />
                                 </div>
-                                <!-- <div class="col" style="padding: 0px;">
-                                    <label for="asignar">Asignar a:</label>
-                                    <select class="custom-select" id="asignar" v-model="TicketMod.usuario"
-                                        @change="updateCategoria">
-                                        <option disabled selected value="">SELECCIONE UNA OPCIÓN</option>
-                                        <option v-for="asignacion in asignaciones" :key="asignacion.id"
-                                            :value="asignacion.id">
-                                            {{ asignacion.nombre }}
-                                        </option>
-                                    </select>
-                                </div> -->
                                 <div class="col" style="padding: 0px;">
-                                        <label for="categoria">Asignar a:</label>
-                                        <select class="custom-select" id="categoria" style="background-color: #ffffff;"
-                                            v-model="TicketMod.categoria">
-                                            <option disabled selected>SELECCIONE UNA OPCIÓN</option>
-                                            <option value="Atención al cliente">Atención al cliente</option>
-                                            <option value="Tesorería">Tesorería</option>
-                                            <option value="Mantenimiento">Mantenimiento</option>
-                                            <option value="Recompensas">Recompensas</option>
-                                            <option value="Sugerencias">Sugerencias</option>
-                                            <option value="Inconformidades">Inconformidades</option>
-                                            <option value="Otros">Otros</option>
-                                        </select>
-                                    </div>
-                                <div class="col" style="padding: 0px;">
-                                    <label for="actividad">Actividad:</label>
-                                    <select class="custom-select" id="actividad" v-model="TicketMod.actividad">
+                                    <label for="categoria">Asignar a:</label>
+                                    <select class="custom-select" id="categoria" style="background-color: #ffffff;"
+                                        v-model="TicketMod.categoria">
                                         <option disabled selected>SELECCIONE UNA OPCIÓN</option>
-                                        <!-- Iterar sobre las actividades y generar las opciones -->
-                                        <option v-for="actividad in actividades" :key="actividad.id"
-                                            :value="actividad.Actividad.toLowerCase().replace(' ', '')">{{
-                                                actividad.Actividad }}</option>
+                                        <option value="Atención al cliente">Atención al cliente</option>
+                                        <option value="Tesorería">Tesorería</option>
+                                        <option value="Mantenimiento">Mantenimiento</option>
+                                        <option value="Recompensas">Recompensas</option>
+                                        <option value="Sugerencias">Sugerencias</option>
+                                        <option value="Inconformidades">Inconformidades</option>
+                                        <option value="Otros">Otros</option>
                                     </select>
                                 </div>
                                 <div class="col">
-                                    <label for="resumen">Unidad Habitacional:</label>
-                                    <input type="text" class="form-control text-center" id="Resumen"
-                                        placeholder="unidad asignada en ticket"
-                                        style="border-radius: 10px; border-color: gray; height: 28px;"
-                                        v-model="TicketMod.AdminUnidadHab" readonly />
+                                    <label for="execution-time">Tiempo para ejecutar la tarea:</label>
+                                    <select class="custom-select" id="execution-time" v-model="TicketMod.executionTime">
+                                        <option disabled selected>SELECCIONE UNA OPCIÓN</option>
+                                        <option value="1 minuto">1 minuto</option>
+                                        <option value="2 minutos">2 minutos</option>
+                                        <option value="5 minutos">5 minutos</option>
+                                        <option value="10 minutos">10 minutos</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="row" style="margin: 10px 0px;">
                                 <div class="col">
-                                    <div class="row">
-                                        <div class="col">
-                                            <label>Evidencia:</label>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col d-flex justify-content-center align-items-center">
-                                            <div class="custom-file">
-                                                <input type="file" class="custom-file-input" id="evidencia"
-                                                    placeholder="JPG / PDF" accept=".jpg, .png, .pdf"
-                                                    @change="handleFileUpload" />
-                                                <label class="custom-file-label" for="evidencia">{{ fileName
-                                                    }}</label>
-                                            </div>
-                                        </div>
+                                    <label v-if="TicketMod.estado === 'Demorado'" for="motivoDemora">Motivo de
+                                        Demora:</label>
+                                    <div v-if="TicketMod.estado === 'Demorado'">
+                                        <select class="custom-select" id="motivoDemora"
+                                            v-model="TicketMod.motivoDemora">
+                                            <option disabled selected>SELECCIONE UNA OPCIÓN</option>
+                                            <option value="Injustificado">Injustificado</option>
+                                            <option value="Falta de Recursos">Falta de Recursos</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -234,7 +199,8 @@
                             <div class="row info-detalle" style="margin-bottom: 10px;">
                                 <div class="col">
                                     <div class="row">
-                                        <p style="margin: 0px; font-weight: 300;">24 hrs</p>
+                                        <p style="margin: 0px; font-weight: 300;">{{
+                                            calculateResponseTimeMinutes() }} minutos</p>
                                     </div>
                                     <div class="row">
                                         <p style="margin: 0px; font-size: 12px; font-weight: 500;">TIEMPO DE RESPUESTA
@@ -264,25 +230,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" style="flex: 1;">
-                                <div class="col" style="display: flex; flex-direction: column; align-items: center;">
-                                    <label for="Detalle" style="display: flex; margin-bottom: 5px;">Imágen enviada en el
-                                        ticket:</label>
-                                    <img :src="selectedTicket.foto" alt="No se envió evidencia"
-                                        style="margin: 20px; max-width: 200px; flex: 1;">
-                                    <!--  <textarea class="form-control" id="Detalle" rows="5"
-                                        style="resize: none; border-radius: 10px" v-model="TicketMod.detalleAdmin">
-                                    </textarea> -->
-                                    <!-- <h2 style="font-weight: 400; font-size: 20px; margin-top: 20px;">{{ selectedTicket.foto }}</h2> -->
-                                    <!-- <img src="https://pagos.starguest.ec:7083/evidenciaticket/78872024429133658.jpg" alt="Descripción de la imagen" style="margin-top: 20px;"> -->
-                                </div>
-                            </div>
                             <div class="row">
                                 <div class="col">
                                     <button class="detalle-btn" @click="toggleDetail">
                                         Cerrar</button>
-                                    <!-- <button class="send-btn" @click="guardarTicket"
-                                        style="margin-top: 20px;">Actualizar</button> -->
                                 </div>
                             </div>
                         </div>
@@ -305,26 +256,23 @@ import Empresa from "@/components/Empresa.vue"; // Importa el componente Empresa
 import ImagenLateral from "@/components/ImagenLateral.vue";
 import axios from 'axios';
 import { reactive } from 'vue'
-import { db } from '../firebase.js'; // Asegúrate de que la ruta al archivo firebase.js sea correcta
+import { db } from '../firebase.js'; 
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref } from 'vue';
 
 export default {
     name: "TicketsAdmin",
     components: {
-        Logo, // Registra el componente Logo
-        Usuario, // Registra el componente Usuario
-        MenuCliente, // Registra el componente MenuCliente
-        Busqueda, // Registra el componente Busqueda
+        Logo,
+        Usuario,
+        MenuCliente,
+        Busqueda, 
         Empresa,
         ImagenLateral,
     },
     data() {
         return {
-            selectedFile: "",
-            fileName: 'Seleccione un archivo (PDF/PNG)', // Agregar esto
             selectedTicket: JSON.parse(localStorage.getItem('selectedTicket')) || {},
-            actividades: [],
             asignaciones: [],
             serverMessage: null,
             isLoading: false,
@@ -334,12 +282,12 @@ export default {
                 usuario: null,
                 prioridad: this.selectedTicket ? this.selectedTicket.prioridad : null,
                 categoria: this.selectedTicket ? this.selectedTicket.categoria : null,
-                actividad: "",
                 descripcion: "",
-                evidencia: "",
                 responsable: `${JSON.parse(localStorage.getItem("nombreusuario"))} ${JSON.parse(localStorage.getItem("apellidousuario"))}`,
                 AdminUnidadHab: this.selectedTicket ? this.selectedTicket.unidad : null,
                 detalleAdmin: this.selectedTicket ? this.selectedTicket.foto : null,
+                executionTime: this.selectedTicket ? (this.selectedTicket.executionTime) : null,
+                motivoDemora: this.selectedTicket ? this.selectedTicket.motivoDemora : ""
             },
             showDetail: false,
             nombre: JSON.parse(localStorage.getItem("nombreusuario")),
@@ -352,19 +300,20 @@ export default {
                 this.isLoading = true;
                 this.TicketMod.id = this.selectedTicket.id;
                 const now = new Date();
-                // Obtén el desfase horario en milisegundos
+                // desfase horario en milisegundos
                 const offset = now.getTimezoneOffset() * 60000;
                 // Ajusta la fecha y hora a la zona horaria local
                 const localDate = new Date(now - offset);
+
                 const ticketData = {
                     id: this.TicketMod.id,
                     estado: this.TicketMod.estado,
                     categoria: this.TicketMod.categoria,
-                    actividad: this.TicketMod.actividad,
                     descripcion: this.TicketMod.descripcion,
                     responsable: this.TicketMod.responsable,
-                    //evidencia: this.selectedFile
-                    fecha: localDate.toISOString()
+                    fecha: localDate.toISOString(),
+                    executionTime: this.TicketMod.executionTime,
+                    motivoDemora: this.TicketMod.estado === 'Demorado' ? this.TicketMod.motivoDemora : null
                 };
 
                 console.log('Datos enviados al servidor:', ticketData);
@@ -379,53 +328,6 @@ export default {
                 this.isLoading = false; // Detener la animación de carga
             }
         },
-        /* async guardarTicket() {
-            try {
-                this.isLoading = true;
-                this.TicketMod.id = this.selectedTicket.id;
-                const formData = new FormData();
-                formData.append('id', this.TicketMod.id);
-                formData.append('estado', this.TicketMod.estado);
-                formData.append('usuario', this.TicketMod.usuario);
-                formData.append('categoria', this.TicketMod.categoria);
-                formData.append('actividad', this.TicketMod.actividad);
-                formData.append('observacion', this.TicketMod.observacion);
-                formData.append('responsable', this.TicketMod.responsable);
-                formData.append('evidencia', this.selectedFile);
-        
-                console.log('Datos enviados al servidor:', this.TicketMod);
-                const response = await axios.post('https://pagos.starguest.ec:7083/actualizaticket', formData);
-                this.serverMessage = response.data.mensaje; // Almacenar el mensaje del servidor
-                console.log('Respuesta del servidor:', response.data);
-            } catch (error) {
-                console.error('Error al enviar el ticket:', error.message);
-            } finally {
-                this.isLoading = false; // Detener la animación de carga
-            }
-        }, */
-
-        /* guardarTicket() {
-            console.log(this.TicketMod);
-            console.log(this.selectedFile);
-        }, */
-        handleFileOptionSelect(event) {
-            const fileInput = this.$el.querySelector("input[type='file']");
-            if (event.target.value === "Seleccionar archivo") {
-                fileInput.click(); // Abrir el diálogo de selección de archivo
-            }
-        },
-        handleFileUpload(event) {
-            // selección del archivo
-            this.selectedFile = event.target.files[0];
-            this.TicketMod.evidencia = event.target.files[0];
-            this.updateFileName(event); // Actualizar el nombre del archivo
-            // console.log(this.selectedFile.name); // Acceder al archivo seleccionado
-        },
-        updateFileName(event) {
-            if (event.target.files.length > 0) {
-                this.fileName = event.target.files[0].name;
-            }
-        },
         toggleDetail() {
             this.showDetail = !this.showDetail;
         },
@@ -434,22 +336,33 @@ export default {
             if (asignacionSeleccionada) {
                 this.TicketMod.categoria = asignacionSeleccionada.nombre;
             }
-        }
+        },
+        calculateResponseTimeMinutes() {
+            const ticket = this.selectedTicket;
+            if (!ticket.fechaCreacionCompleta) return 0;
+
+            // Convertir las fechas a milisegundos desde la época Unix
+            const creationDate = new Date(ticket.fechaCreacionCompleta).getTime();
+
+            // Obtener la fecha y hora actuales y restarle 5 horas
+            const currentDate = new Date();
+            currentDate.setHours(currentDate.getHours() - 5);
+            const adjustedCurrentDate = currentDate.getTime();
+
+            const timeDifference = adjustedCurrentDate - creationDate;
+            const timeDifferenceMinutes = Math.floor(timeDifference / (1000 * 60)); // Convertir a minutos
+
+            return timeDifferenceMinutes;
+        },
     },
     mounted() {
-        fetch('https://pagos.starguest.ec:7083/listaactividades')
-            .then(response => response.json())
-            .then(data => {
-                // Asignar los datos obtenidos a la variable actividades
-                this.actividades = data;
-            })
-            .catch(error => console.error('Error al obtener las actividades:', error));
-
         this.TicketMod.AdminUnidadHab = this.selectedTicket.unidad;
         this.TicketMod.prioridad = this.selectedTicket.prioridad;
         this.TicketMod.estado = this.selectedTicket.estatus;
         this.TicketMod.categoria = this.selectedTicket.categoria;
-    },
+        this.TicketMod.executionTime = (this.selectedTicket.executionTime) || null;
+        this.TicketMod.motivoDemora = this.selectedTicket.motivoDemora || "";
+    }
 };
 </script>
 <style scoped>
